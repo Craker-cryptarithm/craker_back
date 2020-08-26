@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#コメント
 
 def divisor(n): #n以下の約数列挙
     i = 1
