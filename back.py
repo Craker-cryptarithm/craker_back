@@ -2,6 +2,12 @@
 from random import randint
 from time import time
 
+def replace_arr(arr, replacer):
+    res = [None for i in arr]
+    for i, j in enumerate(replacer):
+        res[i] = arr[j]
+    return res
+
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
@@ -32,7 +38,6 @@ def print_figure(arr):
 def explore_answers(factor1, factor2, calculating, result):
     global difficulty
     difficulty += 1
-    print(factor1, factor2, calculating, result)
     for i, j in enumerate(factor1):
         if j == 'x':
             res = 0
@@ -86,7 +91,7 @@ def explore_answers(factor1, factor2, calculating, result):
             return 0
     return 1
 
-def make_problem(mn_factor, mx_factor, num_of_holes):
+def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
     factor1 = randint(mn_factor, mx_factor)
     factor2 = randint(mn_factor, mx_factor)
     result = factor1 * factor2
@@ -145,7 +150,7 @@ def make_problem(mn_factor, mx_factor, num_of_holes):
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
 
-difficulty_input = int(input('difficulty (0, 1, 2): '))
+difficulty_input = int(input('difficulty (0-9): '))
 mn_factor = int(input('min factor: '))
 mx_factor = int(input('max factor: '))
 num_of_holes = int(input('number of holes: '))
@@ -155,13 +160,15 @@ ans_answer = []
 difficulties = []
 
 strt = time()
-timeout = 1
-while time() - strt < timeout:
-    factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(mn_factor, mx_factor, num_of_holes)
+timeout = 3
+t = 0
+while time() - strt < timeout and t < 10:
+    factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input)
     difficulty = 0
     admissible = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole) == 1
     if not admissible:
         continue
+    t += 1
     difficulties.append(difficulty)
     ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
     ans_answer.append([factor1, factor2, calculating, result])
@@ -191,14 +198,15 @@ print(len(difficulties), 'answers found')
 if ans_problem:
     print('problem found')
     idx = -2
+    difficulties_sort = sorted(difficulties)
+    key = -1
     if difficulty_input == 0:
-        idx = 0
-    elif difficulty_input == 2:
-        idx = -1
+        key = difficulties_sort[0]
+    elif difficulty_input == 9:
+        key = difficulties_sort[-1]
     else:
-        difficulties_sort = sorted(difficulties)
-        median = difficulties_sort[len(difficulties_sort) // 2]
-        idx = difficulties.index(median)
+        key = difficulties_sort[len(difficulties_sort) // 2]
+    idx = difficulties.index(key)
     print_figure(ans_problem[idx])
     print('')
     print('answer:')
