@@ -186,7 +186,6 @@ while time() - strt < timeout:
         print('This problem should not be asked')
         print(time() - strt, 'sec')
     '''
-    break
 
 print(len(difficulties), 'answers found')
 if ans_problem:
