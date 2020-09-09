@@ -43,7 +43,6 @@ def print_figure(arr):
 
 
 def explore_answers(factor1, factor2, calculating, result, difficulty):
-    print(factor1, factor2, calculating, result, difficulty)
     difficulty += 1
     for i, j in enumerate(factor1):
         if j == 'x':
@@ -51,7 +50,7 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
             for num in range(10):
                 n_factor1 = [k for k in factor1]
                 n_factor1[i] = str(num)
-                tmp, n_difficulty = explore_answers(n_factor1, factor2, calculating, result, difficulty)
+                tmp, n_difficulty = explore_answers(n_factor1, factor2, calculating, result, 0)
                 difficulty += n_difficulty
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
@@ -71,7 +70,7 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                 else:
                     n_factor2 = [k for k in factor2]
                     n_factor2[i] = str(num)
-                    tmp, n_difficulty = explore_answers(factor1, n_factor2, calculating, result, difficulty)
+                    tmp, n_difficulty = explore_answers(factor1, n_factor2, calculating, result, 0)
                     difficulty += n_difficulty
                     if tmp == -1 or res + tmp > 1:
                         return -1, difficulty
