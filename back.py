@@ -37,19 +37,6 @@ def explore_answers(factor1, factor2, calculating, result):
         if j == 'x':
             res = 0
             for num in range(10):
-                factor2_predicted = []
-                for k in factor2:
-                    if k == 'x':
-                        factor2_predicted.append([])
-                    else:
-                        factor2_predicted.append([k])
-                for k in factor2:
-                    if k == 'x':
-                        continue
-                    calculating_part = num * int(k)
-
-                    print(calculating_part)
-                print(calculating_part)
                 n_factor1 = [k for k in factor1]
                 n_factor1[i] = str(num)
                 tmp = explore_answers(n_factor1, factor2, calculating, result)
