@@ -1,4 +1,3 @@
-# TIMES
 from random import randint
 from time import time
 
