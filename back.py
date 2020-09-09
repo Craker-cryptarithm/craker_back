@@ -42,8 +42,8 @@ def print_figure(arr):
         print(line)
 
 
-def explore_answers(factor1, factor2, calculating, result):
-    global difficulty
+def explore_answers(factor1, factor2, calculating, result, difficulty):
+    print(factor1, factor2, calculating, result, difficulty)
     difficulty += 1
     for i, j in enumerate(factor1):
         if j == 'x':
@@ -51,11 +51,12 @@ def explore_answers(factor1, factor2, calculating, result):
             for num in range(10):
                 n_factor1 = [k for k in factor1]
                 n_factor1[i] = str(num)
-                tmp = explore_answers(n_factor1, factor2, calculating, result)
+                tmp, n_difficulty = explore_answers(n_factor1, factor2, calculating, result, difficulty)
+                difficulty += n_difficulty
                 if tmp == -1 or res + tmp > 1:
-                    return -1
+                    return -1, difficulty
                 res += tmp
-            return res
+            return res, difficulty
     int_factor1 = int(''.join(factor1))
     for i, j in enumerate(factor2):
         if j == 'x':
@@ -70,11 +71,12 @@ def explore_answers(factor1, factor2, calculating, result):
                 else:
                     n_factor2 = [k for k in factor2]
                     n_factor2[i] = str(num)
-                    tmp = explore_answers(factor1, n_factor2, calculating, result)
+                    tmp, n_difficulty = explore_answers(factor1, n_factor2, calculating, result, difficulty)
+                    difficulty += n_difficulty
                     if tmp == -1 or res + tmp > 1:
-                        return -1
+                        return -1, difficulty
                     res += tmp
-            return res
+            return res, difficulty
     calculating_expected = []
     for i in reversed([int(i) for i in factor2]):
         calculating_expected.append(int_factor1 * i)
@@ -92,11 +94,11 @@ def explore_answers(factor1, factor2, calculating, result):
         result_expected += j * (10 ** i)
     result_expected = [i for i in str(result_expected)]
     if len(result) != len(result_expected):
-        return 0
+        return 0, difficulty
     for i, j in zip(result, result_expected):
         if 'x' != i != j:
-            return 0
-    return 1
+            return 0, difficulty
+    return 1, difficulty
 
 def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
     factor1 = randint(mn_factor, mx_factor)
@@ -165,70 +167,75 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
             calculating_hole[tmp - 2][hole - num_of_digit[tmp - 1]] = 'x'
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
+def problem_maker(difficulty_input, mn_factor, mx_factor, num_of_holes, timeout):
+    ans_problem = []
+    ans_answer = []
+    difficulties = []
+    strt = time()
+    t = 0
+    while time() - strt < timeout and t < 10:
+        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input)
+        res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
+        admissible = res_ad == 1
+        if not admissible:
+            continue
+        t += 1
+        difficulties.append(difficulty)
+        ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
+        ans_answer.append([factor1, factor2, calculating, result])
+        '''
+        difficulty_distance = 0 if difficulty_low <= difficulty <= difficulty_high else min(abs(difficulty_low - difficulty), abs(difficulty_high - difficulty))
+        if difficulty_distance == 0:
+            ans_problem = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
+            ans_answer = [factor1, factor2, calculating, result]
+            ans_difficulty = difficulty
+            break
+        elif difficulty_distance < near_difficulty_distance:
+            ans_problem_near = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
+            ans_answer_near = [factor1, factor2, calculating, result]
+            near_difficulty_distance = difficulty_distance
+            ans_difficulty_near = difficulty
+
+        if admissible == 1:
+            print('This problem is admissible')
+            print('difficulty', cnt)
+            print(time() - strt, 'sec')
+        else:
+            print('This problem should not be asked')
+            print(time() - strt, 'sec')
+        '''
+
+    print(len(difficulties), 'answers found')
+    if ans_problem:
+        print('problem found')
+        idx = -2
+        difficulties_sort = sorted(difficulties)
+        key = -1
+        if difficulty_input == 0:
+            key = difficulties_sort[0]
+        elif difficulty_input == 9:
+            key = difficulties_sort[-1]
+        else:
+            key = difficulties_sort[len(difficulties_sort) // 2]
+        idx = difficulties.index(key)
+        print_figure(ans_problem[idx])
+        print('')
+        print('answer:')
+        print_figure(ans_answer[idx])
+        print('difficulty:', difficulties[idx])
+        return ans_problem[idx], ans_answer[idx], difficulties[idx]
+    else:
+        print('problem not found')
+        return -1
+    print(time() - strt, 'sec')
+
+
 
 difficulty_input = int(input('difficulty (0-9): '))
 mn_factor = int(input('min factor: '))
 mx_factor = int(input('max factor: '))
 num_of_holes = int(input('number of holes: '))
-
-ans_problem = []
-ans_answer = []
-difficulties = []
-
-strt = time()
 timeout = 3
-t = 0
-while time() - strt < timeout and t < 10:
-    factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input)
-    difficulty = 0
-    admissible = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole) == 1
-    if not admissible:
-        continue
-    t += 1
-    difficulties.append(difficulty)
-    ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
-    ans_answer.append([factor1, factor2, calculating, result])
-    '''
-    difficulty_distance = 0 if difficulty_low <= difficulty <= difficulty_high else min(abs(difficulty_low - difficulty), abs(difficulty_high - difficulty))
-    if difficulty_distance == 0:
-        ans_problem = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
-        ans_answer = [factor1, factor2, calculating, result]
-        ans_difficulty = difficulty
-        break
-    elif difficulty_distance < near_difficulty_distance:
-        ans_problem_near = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
-        ans_answer_near = [factor1, factor2, calculating, result]
-        near_difficulty_distance = difficulty_distance
-        ans_difficulty_near = difficulty
 
-    if admissible == 1:
-        print('This problem is admissible')
-        print('difficulty', cnt)
-        print(time() - strt, 'sec')
-    else:
-        print('This problem should not be asked')
-        print(time() - strt, 'sec')
-    '''
-
-print(len(difficulties), 'answers found')
-if ans_problem:
-    print('problem found')
-    idx = -2
-    difficulties_sort = sorted(difficulties)
-    key = -1
-    if difficulty_input == 0:
-        key = difficulties_sort[0]
-    elif difficulty_input == 9:
-        key = difficulties_sort[-1]
-    else:
-        key = difficulties_sort[len(difficulties_sort) // 2]
-    idx = difficulties.index(key)
-    print_figure(ans_problem[idx])
-    print('')
-    print('answer:')
-    print_figure(ans_answer[idx])
-    print('difficulty:', difficulties[idx])
-else:
-    print('problem not found')
-print(time() - strt, 'sec')
-
+res = problem_maker(difficulty_input, mn_factor, mx_factor, num_of_holes, timeout)
+print(res)
