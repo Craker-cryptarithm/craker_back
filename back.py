@@ -8,6 +8,14 @@ def replace_arr(arr, replacer):
         res[i] = arr[j]
     return res
 
+def map_int(from_num, from_min, from_max, to_min, to_max):
+    key = (from_num - from_min) / (from_max - from_min)
+    to_float = (to_max - to_min) * key + to_min
+    to_int = int(to_float)
+    if to_float - to_int >= 0.5:
+        to_int += 1
+    return to_int
+
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
@@ -118,7 +126,16 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
     #print(num_of_digit, all_digit)
 
     holes = []
-    for _ in range(num_of_holes):
+    len_problem = len(str(factor1)) + len(str(factor2)) - 1
+    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
+    for _ in range(hole_problem):
+        if len(holes) == all_digit:
+            break
+        tmp = randint(0, len_problem)
+        while tmp in holes:
+            tmp = randint(0, len_problem)
+        holes.append(tmp)
+    for _ in range(num_of_holes - hole_problem):
         if len(holes) == all_digit:
             break
         tmp = randint(0, all_digit - 1)
