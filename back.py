@@ -127,7 +127,7 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
 
     holes = []
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
-    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
+    hole_problem = min(num_of_holes, map_int(difficulty_input, 0, 9, 1, len_problem))
     for _ in range(hole_problem):
         if len(holes) == all_digit:
             break
