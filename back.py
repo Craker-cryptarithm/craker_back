@@ -99,9 +99,10 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
             return 0, difficulty
     return 1, difficulty
 
-def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
-    factor1 = randint(mn_factor, mx_factor)
-    factor2 = randint(mn_factor, mx_factor)
+def make_problem(difficulty_input, digit):
+    max_num = 10 ** digit - 1
+    factor1 = randint(1, max_num)
+    factor2 = randint(1, max_num)
     result = factor1 * factor2
     #print(factor1, factor2, result)
 
@@ -127,7 +128,8 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
 
     holes = []
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
-    hole_problem = min(num_of_holes, map_int(difficulty_input, 0, 9, 1, len_problem))
+    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
+    hole_calc_res = randint(1, all_digit - len_problem - 2)
     for _ in range(hole_problem):
         if len(holes) == all_digit:
             break
@@ -135,7 +137,7 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
         while tmp in holes:
             tmp = randint(0, len_problem)
         holes.append(tmp)
-    for _ in range(num_of_holes - hole_problem):
+    for _ in range(hole_calc_res):
         if len(holes) == all_digit:
             break
         tmp = randint(0, all_digit - 1)
@@ -166,14 +168,14 @@ def make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input):
             calculating_hole[tmp - 2][hole - num_of_digit[tmp - 1]] = 'x'
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
-def problem_maker(difficulty_input, mn_factor, mx_factor, num_of_holes, timeout):
+def problem_maker(difficulty_input, digit, timeout=1):
     ans_problem = []
     ans_answer = []
     difficulties = []
     strt = time()
     t = 0
     while time() - strt < timeout and t < 10:
-        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(mn_factor, mx_factor, num_of_holes, difficulty_input)
+        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(difficulty_input, digit)
         res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
         admissible = res_ad == 1
         if not admissible:
@@ -222,19 +224,18 @@ def problem_maker(difficulty_input, mn_factor, mx_factor, num_of_holes, timeout)
         print('answer:')
         print_figure(ans_answer[idx])
         print('difficulty:', difficulties[idx])
+        print(time() - strt, 'sec')
         return ans_problem[idx], ans_answer[idx], difficulties[idx]
     else:
         print('problem not found')
+        print(time() - strt, 'sec')
         return -1
-    print(time() - strt, 'sec')
 
 
 
 difficulty_input = int(input('difficulty (0-9): '))
-mn_factor = int(input('min factor: '))
-mx_factor = int(input('max factor: '))
-num_of_holes = int(input('number of holes: '))
+digit = int(input('digit: '))
 timeout = 3
 
-res = problem_maker(difficulty_input, mn_factor, mx_factor, num_of_holes, timeout)
+res = problem_maker(difficulty_input, digit, timeout)
 print(res)
