@@ -193,12 +193,3 @@ def problem_maker(difficulty_input, digit, timeout=1):
         print('problem not found')
         print(time() - strt, 'sec')
         return -1
-
-
-
-difficulty_input = int(input('difficulty (0-9): '))
-digit = int(input('digit: '))
-timeout = 3
-
-res = problem_maker(difficulty_input, digit, timeout)
-print(res)
