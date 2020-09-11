@@ -40,7 +40,7 @@ def print_figure(arr):
     ans_str[-1] = ' ' * (width + 1 - len(str(result))) + str(result)
     for line in ans_str:
         print(line)
-    return ans_str
+    return '\n'.join(ans_str)
 
 def explore_answers(factor1, factor2, calculating, result, difficulty):
     difficulty += 1
