@@ -79,15 +79,6 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
     calculating_expected = []
     for i in reversed([int(i) for i in factor2]):
         calculating_expected.append(int_factor1 * i)
-    '''
-    calculating_expected = [[i for i in str(j)] for j in calculating_expected]
-    for i in range(len(calculating)):
-        if len(calculating[i]) != len(calculating_expected[i]):
-            return []
-        for j, k in zip(calculating[i], calculating_expected[i]):
-            if 'x' != j != k:
-                return []
-    '''
     result_expected = 0
     for i, j in enumerate([i for i in calculating_expected]):
         result_expected += j * (10 ** i)
@@ -99,19 +90,15 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
             return 0, difficulty
     return 1, difficulty
 
-def make_problem(difficulty_input, digit):
+def random_problem(difficulty_input, digit):
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
     factor2 = randint(1, max_num)
     result = factor1 * factor2
-    #print(factor1, factor2, result)
 
     calculating = []
     for i in reversed([int(i) for i in str(factor2)]):
         calculating.append(factor1 * i)
-    #print(calculating)
-
-    #print_figure(factor1, factor2, calculating, result)
 
     factor1_split = [i for i in str(factor1)]
     factor2_split = [i for i in str(factor2)]
@@ -124,7 +111,6 @@ def make_problem(difficulty_input, digit):
     all_digit = sum(num_of_digit)
     for i in range(1, len(num_of_digit)):
         num_of_digit[i] += num_of_digit[i - 1]
-    #print(num_of_digit, all_digit)
 
     holes = []
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
@@ -145,7 +131,6 @@ def make_problem(difficulty_input, digit):
             tmp = randint(0, all_digit - 1)
         holes.append(tmp)
     holes.sort()
-    #print('holes', holes)
 
     factor1_hole = [i for i in factor1_split]
     factor2_hole = [i for i in factor2_split]
@@ -175,7 +160,7 @@ def problem_maker(difficulty_input, digit, timeout=1):
     strt = time()
     t = 0
     while time() - strt < timeout and t < 10:
-        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = make_problem(difficulty_input, digit)
+        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
         res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
         admissible = res_ad == 1
         if not admissible:
@@ -183,28 +168,7 @@ def problem_maker(difficulty_input, digit, timeout=1):
         t += 1
         difficulties.append(difficulty)
         ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
-        ans_answer.append([factor1, factor2, calculating, result])
-        '''
-        difficulty_distance = 0 if difficulty_low <= difficulty <= difficulty_high else min(abs(difficulty_low - difficulty), abs(difficulty_high - difficulty))
-        if difficulty_distance == 0:
-            ans_problem = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
-            ans_answer = [factor1, factor2, calculating, result]
-            ans_difficulty = difficulty
-            break
-        elif difficulty_distance < near_difficulty_distance:
-            ans_problem_near = [''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)]
-            ans_answer_near = [factor1, factor2, calculating, result]
-            near_difficulty_distance = difficulty_distance
-            ans_difficulty_near = difficulty
-
-        if admissible == 1:
-            print('This problem is admissible')
-            print('difficulty', cnt)
-            print(time() - strt, 'sec')
-        else:
-            print('This problem should not be asked')
-            print(time() - strt, 'sec')
-        '''
+        ans_answer.append([str(factor1), str(factor2), [str(i) for i in calculating], str(result)])
 
     print(len(difficulties), 'answers found')
     if ans_problem:
