@@ -115,7 +115,7 @@ def random_problem(difficulty_input, digit):
     holes = []
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
     hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
-    hole_calc_res = randint(1, all_digit - len_problem - 2)
+    hole_calc_res = randint(min(all_digit - len_problem - 2, 1 + difficulty_input), all_digit - len_problem - 2)
     for _ in range(hole_problem):
         if len(holes) == all_digit:
             break
@@ -173,7 +173,6 @@ def problem_maker(difficulty_input, digit, timeout=1):
     print(len(difficulties), 'answers found')
     if ans_problem:
         print('problem found')
-        idx = -2
         difficulties_sort = sorted(difficulties)
         key = -1
         if difficulty_input == 0:
