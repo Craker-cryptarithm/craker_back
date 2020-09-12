@@ -192,4 +192,4 @@ def problem_maker(difficulty_input, digit, timeout=1):
     else:
         print('problem not found')
         print(time() - strt, 'sec')
-        return -1
+        return -1, -1, -1
