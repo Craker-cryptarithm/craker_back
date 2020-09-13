@@ -15,16 +15,6 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
         to_int += 1
     return to_int
 
-def find_divisor(num, l):
-    res = []
-    if num == 0:
-        return [[0, -1]]
-    for i in range(1, 10):
-        div = num // i
-        if num % i == 0 and len(str(div)) == l:
-            res.append([i, div])
-    return res
-
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
