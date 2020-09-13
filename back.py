@@ -15,6 +15,16 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
         to_int += 1
     return to_int
 
+def find_divisor(num, l):
+    res = []
+    if num == 0:
+        return [[0, -1]]
+    for i in range(1, 10):
+        div = num // i
+        if num % i == 0 and len(str(div)) == l:
+            res.append([i, div])
+    return res
+
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
@@ -41,6 +51,7 @@ def print_figure(arr):
     for line in ans_str:
         print(line)
     return '\n'.join(ans_str)
+
 
 def explore_answers(factor1, factor2, calculating, result, difficulty):
     difficulty += 1
@@ -89,6 +100,54 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
         if 'x' != i != j:
             return 0, difficulty
     return 1, difficulty
+
+'''
+def search_candidate(factor):
+    res = []
+    if factor[0] == 'x':
+        for i in range(1, 10):
+            n_factor = [j for j in factor]
+            n_factor[0] = i
+            res.extend(search_candidate(n_factor))
+        return res
+    else:
+        for i, j in enumerate(factor):
+            if j == 'x':
+                for k in range(10):
+                    n_factor = [l for l in factor]
+                    n_factor[i] = k
+                    res.extend(search_candidate(n_factor))
+                return res
+        return [factor]
+
+def explore_answers(factor1, factor2, calculating, result):
+    difficulty = 0
+    factor1_candidate = search_candidate(factor1)
+    print(len(factor1_candidate))
+    factor2_candidate = [[] for _ in factor1_candidate]
+    for idx, calc in enumerate(calculating):
+        candidate_idx = 0
+        while candidate_idx < len(factor1_candidate):
+            candidate = factor1_candidate[candidate_idx]
+            flag_candidate = False
+            for i in range(10):
+                difficulty += 1
+                tmp = str(candidate * i)
+                for j, k in zip(calc, tmp):
+                    if j != 'x' and j != k:
+                        break
+                else:
+                    flag_candidate = True
+                    factor2_candidate[candidate_idx].append(i)
+            if not flag_candidate:
+                del factor1_candidate[candidate_idx]
+                del factor2_candidate[candidate_idx]
+            else:
+                candidate_idx += 1
+    print(factor1_candidate)
+'''
+
+
 
 def random_problem(difficulty_input, digit):
     max_num = 10 ** digit - 1
