@@ -1,12 +1,19 @@
+'''
+Craker Backend
+Copyright 2020 Nyanyan
+'''
+
 from random import randint
 from time import time
 
+# 配列を置換する関数
 def replace_arr(arr, replacer):
     res = [None for i in arr]
     for i, j in enumerate(replacer):
         res[i] = arr[j]
     return res
 
+# 一定範囲中の数を新たな範囲の数にmapする関数
 def map_int(from_num, from_min, from_max, to_min, to_max):
     key = (from_num - from_min) / (from_max - from_min)
     to_float = (to_max - to_min) * key + to_min
@@ -15,6 +22,7 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
         to_int += 1
     return to_int
 
+# 等幅フォントで綺麗に筆算を表示する関数
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
@@ -42,13 +50,20 @@ def print_figure(arr):
         print(line)
     return '\n'.join(ans_str)
 
-
+# 解が一意に定まるか検証する関数
 def explore_answers(factor1, factor2, calculating, result, difficulty):
+    # 基本的には穴をランダムに埋めて再帰呼び出しして矛盾がないか確認する。
+
+    # difficultyは関数の呼び出し回数で定義
     difficulty += 1
+
+    # factor1(上段の上)に穴がある場合はランダムな数字を入れる。
     for i, j in enumerate(factor1):
         if j == 'x':
             res = 0
             for num in range(10):
+                if i == 0 and num == 0:
+                    continue
                 n_factor1 = [k for k in factor1]
                 n_factor1[i] = str(num)
                 tmp, n_difficulty = explore_answers(n_factor1, factor2, calculating, result, 0)
@@ -57,6 +72,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                     return -1, difficulty
                 res += tmp
             return res, difficulty
+    
+    # factor1に穴がなく、factor2(上段の下)に穴がある場合はランダムに埋めつつ矛盾がないか確認して再帰呼び出しする。
     int_factor1 = int(''.join(factor1))
     for i, j in enumerate(factor2):
         if j == 'x':
@@ -77,6 +94,9 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                         return -1, difficulty
                     res += tmp
             return res, difficulty
+    
+    # factor1もfactor2も埋まっている場合は矛盾がないかチェックする。
+    # factor2を埋める際にcalculating(中段)では矛盾がないことが保証されるので、result(下段)で矛盾がないか確認する。
     calculating_expected = []
     for i in reversed([int(i) for i in factor2]):
         calculating_expected.append(int_factor1 * i)
@@ -91,64 +111,18 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
             return 0, difficulty
     return 1, difficulty
 
-'''
-def search_candidate(factor):
-    res = []
-    if factor[0] == 'x':
-        for i in range(1, 10):
-            n_factor = [j for j in factor]
-            n_factor[0] = i
-            res.extend(search_candidate(n_factor))
-        return res
-    else:
-        for i, j in enumerate(factor):
-            if j == 'x':
-                for k in range(10):
-                    n_factor = [l for l in factor]
-                    n_factor[i] = k
-                    res.extend(search_candidate(n_factor))
-                return res
-        return [factor]
-
-def explore_answers(factor1, factor2, calculating, result):
-    difficulty = 0
-    factor1_candidate = search_candidate(factor1)
-    print(len(factor1_candidate))
-    factor2_candidate = [[] for _ in factor1_candidate]
-    for idx, calc in enumerate(calculating):
-        candidate_idx = 0
-        while candidate_idx < len(factor1_candidate):
-            candidate = factor1_candidate[candidate_idx]
-            flag_candidate = False
-            for i in range(10):
-                difficulty += 1
-                tmp = str(candidate * i)
-                for j, k in zip(calc, tmp):
-                    if j != 'x' and j != k:
-                        break
-                else:
-                    flag_candidate = True
-                    factor2_candidate[candidate_idx].append(i)
-            if not flag_candidate:
-                del factor1_candidate[candidate_idx]
-                del factor2_candidate[candidate_idx]
-            else:
-                candidate_idx += 1
-    print(factor1_candidate)
-'''
-
-
-
+# ランダムに問題を生成する関数
 def random_problem(difficulty_input, digit):
+    # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
     factor2 = randint(1, max_num)
     result = factor1 * factor2
 
+    # 中段の数字たちを計算する
     calculating = []
     for i in reversed([int(i) for i in str(factor2)]):
         calculating.append(factor1 * i)
-
     factor1_split = [i for i in str(factor1)]
     factor2_split = [i for i in str(factor2)]
     calculating_split = [[i for i in str(j)] for j in calculating]
@@ -161,10 +135,14 @@ def random_problem(difficulty_input, digit):
     for i in range(1, len(num_of_digit)):
         num_of_digit[i] += num_of_digit[i - 1]
 
+    # 穴をランダムにあける
     holes = []
+    # 上段にあける穴の数は問題の難易度に直結するので、入力された難易度に比例して穴の数が多くなるようにする。
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
     hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
+    # 中段と下段にあける穴の数をランダムに決める
     hole_calc_res = randint(min(all_digit - len_problem - 2, 1 + difficulty_input), all_digit - len_problem - 2)
+    # 穴をあける場所を決める
     for _ in range(hole_problem):
         if len(holes) == all_digit:
             break
@@ -181,6 +159,7 @@ def random_problem(difficulty_input, digit):
         holes.append(tmp)
     holes.sort()
 
+    # 決めた場所に穴をあける(xに置換する)
     factor1_hole = [i for i in factor1_split]
     factor2_hole = [i for i in factor2_split]
     calculating_hole = [[i for i in j] for j in calculating_split]
@@ -202,12 +181,15 @@ def random_problem(difficulty_input, digit):
             calculating_hole[tmp - 2][hole - num_of_digit[tmp - 1]] = 'x'
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
+# メインで使う関数
 def problem_maker(difficulty_input, digit, timeout=1):
     ans_problem = []
     ans_answer = []
     difficulties = []
     strt = time()
     t = 0
+
+    # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
         factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
         res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
@@ -219,16 +201,20 @@ def problem_maker(difficulty_input, digit, timeout=1):
         ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
         ans_answer.append([str(factor1), str(factor2), [str(i) for i in calculating], str(result)])
 
+    # 採用する問題を選ぶ
     print(len(difficulties), 'answers found')
     if ans_problem:
         print('problem found')
         difficulties_sort = sorted(difficulties)
         key = -1
         if difficulty_input == 0:
+            # 最も簡単な問題を選ぶ
             key = difficulties_sort[0]
         elif difficulty_input == 9:
+            # 最も難しい問題を選ぶ
             key = difficulties_sort[-1]
         else:
+            # 実測難易度(difficulties)の中央値の問題を選ぶ
             key = difficulties_sort[len(difficulties_sort) // 2]
         idx = difficulties.index(key)
         print_figure(ans_problem[idx])
@@ -239,6 +225,7 @@ def problem_maker(difficulty_input, digit, timeout=1):
         print(time() - strt, 'sec')
         return ans_problem[idx], ans_answer[idx], difficulties[idx]
     else:
+        # 問題が見つからなかった場合
         print('problem not found')
         print(time() - strt, 'sec')
         return -1, -1, -1
