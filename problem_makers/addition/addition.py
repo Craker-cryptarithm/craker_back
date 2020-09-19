@@ -123,8 +123,8 @@ def random_problem(difficulty_input, digit):
 
     # 穴をランダムにあける
     holes = []
-    min_holes = map_int(difficulty_input, 0, 9, 1, all_digit // 3)
-    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 2)
+    min_holes = map_int(difficulty_input, 0, 9, 1, all_digit // 4)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 3)
     num_of_holes = randint(min_holes, max_holes)
     for _ in range(num_of_holes):
         if len(holes) == all_digit:

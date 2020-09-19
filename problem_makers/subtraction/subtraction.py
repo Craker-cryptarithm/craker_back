@@ -21,7 +21,7 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
 def print_figure(arr):
     factor1, factor2, result = arr
     ans_str = ['' for _ in range(4)]
-    width = len(str(result)) + 1
+    width = max(len(str(factor1)), len(str(factor2))) + 1
     space = width - len(str(factor1))
     for _ in range(space):
         ans_str[0] += ' '
@@ -67,7 +67,7 @@ def explore_answers(factor1, factor2, result, difficulty):
                 res += tmp
             return res, difficulty
     
-    calculating = [0 for _ in range(len(result))]
+    calculating = [0 for _ in range(max(len(factor1), len(factor2)))]
     for ii, j in enumerate(reversed(factor2)):
         i = len(factor2) - 1 - ii
         if j == 'x':
@@ -78,7 +78,10 @@ def explore_answers(factor1, factor2, result, difficulty):
                 tmp = 0
                 if len(factor1) - 1 - ii >= 0:
                     tmp = int(factor1[len(factor1) - 1 - ii])
-                if str(calculating[i] - num + tmp)[-1] == result[len(result) - 1 - ii]:
+                result_tmp = 0
+                if len(result) - 1 - ii >= 0:
+                    result_tmp = result[len(result) - 1 - ii]
+                if str(calculating[i] - num + tmp) == result_tmp:
                     n_factor2 = [k for k in factor2]
                     n_factor2[i] = str(num)
                     tmp, n_difficulty = explore_answers(factor1, n_factor2, result, 0)
@@ -94,9 +97,8 @@ def explore_answers(factor1, factor2, result, difficulty):
             sum_sub = tmp - int(j)
             if sum_sub < 0:
                 sum_sub += 10
-                calculating
-            for k, l in enumerate(reversed(sum_sub)):
-                calculating[i - k] += int(l)
+                calculating[i - 1] -= 1
+            calculating[i] += sum_sub
     factor1_int = int(''.join(factor1))
     factor2_int = int(''.join(factor2))
     result_expected = str(factor1_int + factor2_int)
@@ -125,8 +127,8 @@ def random_problem(difficulty_input, digit):
 
     # 穴をランダムにあける
     holes = []
-    min_holes = map_int(difficulty_input, 0, 9, 1, all_digit // 3)
-    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 2)
+    min_holes = map_int(difficulty_input, 0, 9, 1, all_digit // 4)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 3)
     num_of_holes = randint(min_holes, max_holes)
     for _ in range(num_of_holes):
         if len(holes) == all_digit:
