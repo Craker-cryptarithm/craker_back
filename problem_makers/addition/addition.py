@@ -1,7 +1,21 @@
-from basic import replace_arr, map_int
 from time import time
 from random import randint
 
+# 配列を置換する関数
+def replace_arr(arr, replacer):
+    res = [None for i in arr]
+    for i, j in enumerate(replacer):
+        res[i] = arr[j]
+    return res
+
+# 一定範囲中の数を新たな範囲の数にmapする関数
+def map_int(from_num, from_min, from_max, to_min, to_max):
+    key = (from_num - from_min) / (from_max - from_min)
+    to_float = (to_max - to_min) * key + to_min
+    to_int = int(to_float)
+    if to_float - to_int >= 0.5:
+        to_int += 1
+    return to_int
 
 # 等幅フォントで綺麗に筆算を表示する関数
 def print_figure(arr):
@@ -109,7 +123,9 @@ def random_problem(difficulty_input, digit):
 
     # 穴をランダムにあける
     holes = []
-    num_of_holes = randint(map_int(difficulty_input, 0, 9, 1, all_digit // 2), map_int(difficulty_input, 0, 9, 1, all_digit))
+    min_holes = map_int(difficulty_input, 0, 9, 1, all_digit // 3)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 2)
+    num_of_holes = randint(min_holes, max_holes)
     for _ in range(num_of_holes):
         if len(holes) == all_digit:
             break

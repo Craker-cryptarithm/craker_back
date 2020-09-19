@@ -1,10 +1,26 @@
-from basic import replace_arr, map_int
 from time import time
 from random import randint
 
+import sys
+# 配列を置換する関数
+def replace_arr(arr, replacer):
+    res = [None for i in arr]
+    for i, j in enumerate(replacer):
+        res[i] = arr[j]
+    return res
+
+# 一定範囲中の数を新たな範囲の数にmapする関数
+def map_int(from_num, from_min, from_max, to_min, to_max):
+    key = (from_num - from_min) / (from_max - from_min)
+    to_float = (to_max - to_min) * key + to_min
+    to_int = int(to_float)
+    if to_float - to_int >= 0.5:
+        to_int += 1
+    return to_int
+
 
 # 等幅フォントで綺麗に筆算を表示する関数
-def print_figure_multiplication(arr):
+def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
     width = max(len(str(factor1)), len(str(factor2)), len(str(result)) - 1)
@@ -33,7 +49,7 @@ def print_figure_multiplication(arr):
 
 
 # 解が一意に定まるか検証する関数
-def explore_answers_multiplication(factor1, factor2, calculating, result, difficulty):
+def explore_answers(factor1, factor2, calculating, result, difficulty):
     # 基本的には穴をランダムに埋めて再帰呼び出しして矛盾がないか確認する。
 
     # difficultyは関数の呼び出し回数で定義
@@ -48,7 +64,7 @@ def explore_answers_multiplication(factor1, factor2, calculating, result, diffic
                     continue
                 n_factor1 = [k for k in factor1]
                 n_factor1[i] = str(num)
-                tmp, n_difficulty = explore_answers_multiplication(n_factor1, factor2, calculating, result, 0)
+                tmp, n_difficulty = explore_answers(n_factor1, factor2, calculating, result, 0)
                 difficulty += n_difficulty
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
@@ -70,7 +86,7 @@ def explore_answers_multiplication(factor1, factor2, calculating, result, diffic
                 else:
                     n_factor2 = [k for k in factor2]
                     n_factor2[i] = str(num)
-                    tmp, n_difficulty = explore_answers_multiplication(factor1, n_factor2, calculating, result, 0)
+                    tmp, n_difficulty = explore_answers(factor1, n_factor2, calculating, result, 0)
                     difficulty += n_difficulty
                     if tmp == -1 or res + tmp > 1:
                         return -1, difficulty
@@ -97,7 +113,7 @@ def explore_answers_multiplication(factor1, factor2, calculating, result, diffic
 
 
 # ランダムに問題を生成する関数
-def random_problem_multiplication(difficulty_input, digit):
+def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
@@ -178,8 +194,8 @@ def problem_maker_multiplication(difficulty_input, digit, timeout=1):
 
     # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
-        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem_multiplication(difficulty_input, digit)
-        res_ad, difficulty = explore_answers_multiplication(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
+        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
+        res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
         admissible = res_ad == 1
         if not admissible:
             continue
@@ -204,12 +220,12 @@ def problem_maker_multiplication(difficulty_input, digit, timeout=1):
             # 実測難易度(difficulties)の中央値の問題を選ぶ
             key = difficulties_sort[len(difficulties_sort) // 2]
         idx = difficulties.index(key)
-        print(print_figure_multiplication(ans_problem[idx]))
+        print(print_figure(ans_problem[idx]))
         print('answer:')
-        print(print_figure_multiplication(ans_answer[idx]))
+        print(print_figure(ans_answer[idx]))
         print('difficulty:', difficulties[idx])
         print(time() - strt, 'sec')
-        return print_figure_multiplication(ans_problem[idx]), print_figure_multiplication(ans_answer[idx]), difficulties[idx]
+        return print_figure(ans_problem[idx]), print_figure(ans_answer[idx]), difficulties[idx]
     else:
         # 問題が見つからなかった場合
         print('problem not found')
