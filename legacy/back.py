@@ -23,35 +23,7 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
     return to_int
 
 # 等幅フォントで綺麗に筆算を表示する関数
-def print_figure_addition(arr):
-    factor1, factor2, result = arr
-    ans_str = ['' for _ in range(4)]
-    width = len(str(result)) + 1
-    space = width - len(str(factor1))
-    for _ in range(space):
-        ans_str[0] += ' '
-    for i in str(factor1):
-        ans_str[0] += i
-    space = width - len(str(factor2))
-    for _ in range(space):
-        ans_str[1] += ' '
-    for i in str(factor2):
-        ans_str[1] += i
-    ans_str[2] += '+'
-    for _ in range(width - 1):
-        ans_str[2] += '_'
-    space = width - len(str(result))
-    for _ in range(space):
-        ans_str[3] += ' '
-    for i in str(result):
-        ans_str[3] += i
-    
-    for line in ans_str:
-        print(line)
-    return '\n'.join(ans_str)
-
-# 等幅フォントで綺麗に筆算を表示する関数
-def print_figure_multiplication(arr):
+def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
     width = max(len(str(factor1)), len(str(factor2)), len(str(result)) - 1)
@@ -79,7 +51,7 @@ def print_figure_multiplication(arr):
     return '\n'.join(ans_str)
 
 # 解が一意に定まるか検証する関数
-def explore_answers_multiplication(factor1, factor2, calculating, result, difficulty):
+def explore_answers(factor1, factor2, calculating, result, difficulty):
     # 基本的には穴をランダムに埋めて再帰呼び出しして矛盾がないか確認する。
 
     # difficultyは関数の呼び出し回数で定義
@@ -139,47 +111,8 @@ def explore_answers_multiplication(factor1, factor2, calculating, result, diffic
             return 0, difficulty
     return 1, difficulty
 
-def random_problem_addition(difficulty_input, digit):
-    # ランダムに上段の数字を決める
-    max_num = 10 ** digit - 1
-    factor1 = randint(1, max_num)
-    factor2 = randint(1, max_num)
-    result = factor1 + factor2
-    len_factor1 = len(str(factor1))
-    len_factor2 = len(str(factor2))
-    len_result = len(str(result))
-    all_digit = len_factor1 + len_factor2 + len_result
-    factor1_split = [i for i in str(factor1)]
-    factor2_split = [i for i in str(factor2)]
-    result_split = [i for i in str(result)]
-
-    # 穴をランダムにあける
-    holes = []
-    num_of_holes = randint(map_int(difficulty_input, 0, 9, 1, all_digit // 2), map_int(difficulty_input, 0, 9, 1, all_digit))
-    for _ in range(num_of_holes):
-        if len(holes) == all_digit:
-            break
-        tmp = randint(0, all_digit - 1)
-        while tmp in holes:
-            tmp = randint(0, all_digit - 1)
-        holes.append(tmp)
-    holes.sort()
-
-    # 決めた場所に穴をあける(xに置換する)
-    factor1_hole = [i for i in factor1_split]
-    factor2_hole = [i for i in factor2_split]
-    result_hole = [i for i in result_split]
-    for hole in holes:
-        if hole < len_factor1:
-            factor1_hole[hole] = 'x'
-        elif hole < len_factor1 + len_factor2:
-            factor2_hole[hole - len_factor1] = 'x'
-        else:
-            result_hole[hole - len_factor1 - len_factor2] = 'x'
-    return factor1_hole, factor2_hole, result_hole, factor1, factor2, result
-
 # ランダムに問題を生成する関数
-def random_problem_multiplication(difficulty_input, digit):
+def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
@@ -248,18 +181,8 @@ def random_problem_multiplication(difficulty_input, digit):
             calculating_hole[tmp - 2][hole - num_of_digit[tmp - 1]] = 'x'
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
-def problem_maker_addition(difficulty_input, digit, timeout=1):
-    ans_problem = []
-    ans_answer = []
-    difficulties = []
-    strt = time()
-    t = 0
-
-    factor1_hole, factor2_hole, result_hole, factor1, factor2, result = random_problem_addition(difficulty_input, digit)
-    print_figure_addition([''.join(factor1_hole), ''.join(factor2_hole), ''.join(result_hole)])
-
 # メインで使う関数
-def problem_maker_multiplication(difficulty_input, digit, timeout=1):
+def problem_maker(difficulty_input, digit, timeout=1):
     ans_problem = []
     ans_answer = []
     difficulties = []
@@ -268,8 +191,8 @@ def problem_maker_multiplication(difficulty_input, digit, timeout=1):
 
     # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
-        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem_multiplication(difficulty_input, digit)
-        res_ad, difficulty = explore_answers_multiplication(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
+        factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
+        res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
         admissible = res_ad == 1
         if not admissible:
             continue

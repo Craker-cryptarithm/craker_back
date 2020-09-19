@@ -1,10 +1,3 @@
-# backプログラムのテスト用プログラム
+from back import problem_maker_multiplication, problem_maker_addition
 
-from back import problem_maker
-
-difficulty_input = int(input('difficulty (0-9): '))
-digit = int(input('digit: '))
-timeout = 3
-
-res = problem_maker(difficulty_input, digit, timeout)
-print(res)
+problem_maker_addition(3, 3)
