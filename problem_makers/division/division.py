@@ -184,7 +184,7 @@ def random_problem(difficulty_input, digit):
 
 
 
-def problem_maker_multiplication(difficulty_input, digit, timeout=1):
+def problem_maker_division(difficulty_input, digit, timeout=1):
     ans_problem = []
     ans_answer = []
     difficulties = []
