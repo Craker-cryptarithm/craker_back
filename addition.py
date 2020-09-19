@@ -4,7 +4,7 @@ from random import randint
 
 
 # 等幅フォントで綺麗に筆算を表示する関数
-def print_figure_addition(arr):
+def print_figure(arr):
     factor1, factor2, result = arr
     ans_str = ['' for _ in range(4)]
     width = len(str(result)) + 1
@@ -31,7 +31,7 @@ def print_figure_addition(arr):
 
 
 
-def explore_answers_addition(factor1, factor2, result, difficulty):
+def explore_answers(factor1, factor2, result, difficulty):
     # 基本的には穴をランダムに埋めて再帰呼び出しして矛盾がないか確認する。
 
     # difficultyは関数の呼び出し回数で定義
@@ -45,15 +45,15 @@ def explore_answers_addition(factor1, factor2, result, difficulty):
                 if i == 0 and num == 0:
                     continue
                 n_factor1 = [k for k in factor1]
-                n_factor1[i] = num
-                tmp, n_difficulty = explore_answers_addition(n_factor1, factor2, result, 0)
+                n_factor1[i] = str(num)
+                tmp, n_difficulty = explore_answers(n_factor1, factor2, result, 0)
                 difficulty += n_difficulty
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
                 res += tmp
             return res, difficulty
     
-    calculating = [0 for _ in range(len(max(len(factor1), len(factor2))))]
+    calculating = [0 for _ in range(len(result))]
     for ii, j in enumerate(reversed(factor2)):
         i = len(factor2) - 1 - ii
         if j == 'x':
@@ -63,11 +63,11 @@ def explore_answers_addition(factor1, factor2, result, difficulty):
                     continue
                 tmp = 0
                 if len(factor1) - 1 - ii >= 0:
-                    tmp = factor1[len(factor1) - 1 - ii]
+                    tmp = int(factor1[len(factor1) - 1 - ii])
                 if str(calculating[i] + num + tmp)[-1] == result[len(result) - 1 - ii]:
                     n_factor2 = [k for k in factor2]
-                    n_factor2[i] = num
-                    tmp, n_difficulty = explore_answers_addition(factor1, n_factor2, result, 0)
+                    n_factor2[i] = str(num)
+                    tmp, n_difficulty = explore_answers(factor1, n_factor2, result, 0)
                     difficulty += n_difficulty
                     if tmp == -1 or res + tmp > 1:
                         return -1, difficulty
@@ -76,7 +76,7 @@ def explore_answers_addition(factor1, factor2, result, difficulty):
         else:
             tmp = 0
             if len(factor1) - 1 - ii >= 0:
-                tmp = factor1[len(factor1) - 1 - ii]
+                tmp = int(factor1[len(factor1) - 1 - ii])
             sum_sub_int = tmp + int(j)
             sum_sub = [k for k in str(sum_sub_int)]
             for k, l in enumerate(reversed(sum_sub)):
@@ -93,7 +93,7 @@ def explore_answers_addition(factor1, factor2, result, difficulty):
 
 
 
-def random_problem_addition(difficulty_input, digit):
+def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
@@ -141,5 +141,41 @@ def problem_maker_addition(difficulty_input, digit, timeout=1):
     strt = time()
     t = 0
 
-    factor1_hole, factor2_hole, result_hole, factor1, factor2, result = random_problem_addition(difficulty_input, digit)
-    print(print_figure_addition([''.join(factor1_hole), ''.join(factor2_hole), ''.join(result_hole)]))
+    while time() - strt < timeout and t < 10:
+        factor1_hole, factor2_hole, result_hole, factor1, factor2, result = random_problem(difficulty_input, digit)
+        res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, result_hole, 0)
+        admissible = res_ad == 1
+        if not admissible:
+            continue
+        t += 1
+        difficulties.append(difficulty)
+        ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), ''.join(result_hole)])
+        ans_answer.append([str(factor1), str(factor2), str(result)])
+    
+    # 採用する問題を選ぶ
+    print(len(difficulties), 'answers found')
+    if ans_problem:
+        print('problem found')
+        difficulties_sort = sorted(difficulties)
+        key = -1
+        if difficulty_input == 0:
+            # 最も簡単な問題を選ぶ
+            key = difficulties_sort[0]
+        elif difficulty_input == 9:
+            # 最も難しい問題を選ぶ
+            key = difficulties_sort[-1]
+        else:
+            # 実測難易度(difficulties)の中央値の問題を選ぶ
+            key = difficulties_sort[len(difficulties_sort) // 2]
+        idx = difficulties.index(key)
+        print(print_figure(ans_problem[idx]))
+        print('answer:')
+        print(print_figure(ans_answer[idx]))
+        print('difficulty:', difficulties[idx])
+        print(time() - strt, 'sec')
+        return print_figure(ans_problem[idx]), print_figure(ans_answer[idx]), difficulties[idx]
+    else:
+        # 問題が見つからなかった場合
+        print('problem not found')
+        print(time() - strt, 'sec')
+        return -1, -1, -1
