@@ -107,7 +107,7 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
 def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
-    factor1 = randint(1, max_num)
+    factor1 = randint(max_num // 10, max_num)
     factor2 = randint(1, factor1 // 100)
     result = factor1 // factor2
 
@@ -116,6 +116,8 @@ def random_problem(difficulty_input, digit):
     strt = 0
     str_factor1 = str(factor1)
     len_factor1 = len(str_factor1)
+    len_factor2 = len(str(factor2))
+    len_result = len(str(result))
     for i in range(len_factor1):
         if int(str_factor1[:i + 1]) >= factor2:
             strt = i
@@ -127,13 +129,16 @@ def random_problem(difficulty_input, digit):
         calc = num // factor2
         num %= factor2
         calculating.append(num)
-    num_of_digit = len_factor1 + len(str(factor2)) + sum(len(str(i)) for i in calculating) + len(str(result))
-    print(factor1, factor2, result, calculating, num_of_digit)
+    all_digit = len_factor1 + len_factor2 + sum(len(str(i)) for i in calculating) + len_result
+    factor1_split = [i for i in str(factor1)]
+    factor2_split = [i for i in str(factor2)]
+    result_split = [i for i in str(result)]
+    calculating_split = [[i for i in str(j)] for j in calculating]
 
     # 穴をランダムにあける
     holes = []
-    min_holes = map_int(difficulty_input, 0, 9, min(difficulty_input, num_of_digit), num_of_digit // 2)
-    max_holes = map_int(difficulty_input, 0, 9, min_holes, num_of_digit // 1.5)
+    min_holes = map_int(difficulty_input, 0, 9, min(difficulty_input, all_digit), all_digit // 2)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 1.5)
     num_of_holes = randint(min_holes, max_holes)
     # 穴をあける場所を決める
     for _ in range(num_of_holes):
@@ -150,21 +155,21 @@ def random_problem(difficulty_input, digit):
     factor2_hole = [i for i in factor2_split]
     calculating_hole = [[i for i in j] for j in calculating_split]
     result_hole = [i for i in result_split]
-    len_num_of_digit = len(num_of_digit)
     for hole in holes:
-        tmp = 0
-        for i in range(1, len_num_of_digit):
-            if num_of_digit[i - 1] <= hole < num_of_digit[i]:
-                tmp = i
-                break
-        if tmp == 0:
-            factor1_hole[hole - 0] = 'x'
-        elif tmp == 1:
-            factor2_hole[hole - num_of_digit[tmp - 1]] = 'x'
-        elif tmp == len_num_of_digit - 1:
-            result_hole[hole - num_of_digit[-2]] = 'x'
+        if hole < len_factor1:
+            factor1_hole[hole] = 'x'
+        elif hole < len_factor1 + len_factor2:
+            factor2_hole[hole - len_factor1] = 'x'
+        elif hole < all_digit - len_result:
+            tmp = hole - len_factor1 - len_factor2
+            for i, j in enumerate(calculating_hole):
+                if tmp < len(j):
+                    calculating_hole[i][tmp] = 'x'
+                    break
+                tmp -= len(j)
         else:
-            calculating_hole[tmp - 2][hole - num_of_digit[tmp - 1]] = 'x'
+            result_hole[len_result - all_digit + hole] = 'x'
+            
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
 
