@@ -22,13 +22,13 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
-    width = len(factor1) + 1 + len(factor2)
-    for _ in range(width - result):
+    width = len(str(factor1)) + 1 + len(str(factor2))
+    for _ in range(width - len(str(result))):
         ans_str[0] += ' '
     ans_str[0] += str(result)
-    for _ in range(width - len(factor1)):
+    for _ in range(width - len(str(factor1))):
         ans_str[1] += ' '
-    for _ in range(len(factor1)):
+    for _ in range(len(str(factor1))):
         ans_str[1] += '_'
     ans_str[1]
     ans_str[2] = str(factor2) + ')' + str(factor1)
@@ -113,15 +113,11 @@ def random_problem(difficulty_input, digit):
 
     # 下段の数字たちを計算する
     calculating = []
-    strt = 0
     str_factor1 = str(factor1)
     len_factor1 = len(str_factor1)
     len_factor2 = len(str(factor2))
     len_result = len(str(result))
-    for i in range(len_factor1):
-        if int(str_factor1[:i + 1]) >= factor2:
-            strt = i
-            break
+    strt = len_factor1 - len_result
     num = int(str_factor1[:strt])
     for i in range(strt, len_factor1):
         num *= 10
@@ -169,7 +165,7 @@ def random_problem(difficulty_input, digit):
                 tmp -= len(j)
         else:
             result_hole[len_result - all_digit + hole] = 'x'
-            
+
     return factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result
 
 
@@ -182,6 +178,8 @@ def problem_maker_division(difficulty_input, digit, timeout=1):
     strt = time()
     t = 0
     factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
+    print_figure([factor1, factor2, calculating, result])
+    print_figure([''.join(factor1_hole), ''.join(factor2_hole), [''.join(calculating) for calculating in calculating_hole], ''.join(result_hole)])
     '''
     # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
