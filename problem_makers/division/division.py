@@ -22,26 +22,18 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
     ans_str = ['' for _ in range(5 + len(calculating))]
-    width = max(len(str(factor1)), len(str(factor2)), len(str(result)) - 1)
-    for i, j in enumerate(calculating):
-        width = max(width, len(str(j)) + i)
-    for line_num, factor in enumerate([factor1, factor2]):
-        tmp = ''
-        for _ in range(width + 1 - len(str(factor))):
-            tmp += ' '
-        tmp += str(factor)
-        ans_str[line_num] = tmp
-    ans_str[2] = 'x' + '_' * width
-    for i, factor in enumerate(calculating):
-        line_num = i + 3
-        tmp = ''
-        for _ in range(width + 1 - i - len(str(factor))):
-            tmp += ' '
-        tmp += str(factor)
-        tmp += ' ' * i
-        ans_str[line_num] = tmp
-    ans_str[-2] = '_' * (width + 1)
-    ans_str[-1] = ' ' * (width + 1 - len(str(result))) + str(result)
+    width = len(factor1) + 1 + len(factor2)
+    for _ in range(width - result):
+        ans_str[0] += ' '
+    ans_str[0] += str(result)
+    for _ in range(width - len(factor1)):
+        ans_str[1] += ' '
+    for _ in range(len(factor1)):
+        ans_str[1] += '_'
+    ans_str[1]
+    ans_str[2] = str(factor2) + ')' + str(factor1)
+    for line in ans_str:
+        print(line)
     return '\n'.join(ans_str)
 
 
@@ -116,41 +108,35 @@ def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
     factor1 = randint(1, max_num)
-    factor2 = randint(1, max_num)
-    result = factor1 * factor2
+    factor2 = randint(1, factor1 // 100)
+    result = factor1 // factor2
 
-    # 中段の数字たちを計算する
+    # 下段の数字たちを計算する
     calculating = []
-    for i in reversed([int(i) for i in str(factor2)]):
-        calculating.append(factor1 * i)
-    factor1_split = [i for i in str(factor1)]
-    factor2_split = [i for i in str(factor2)]
-    calculating_split = [[i for i in str(j)] for j in calculating]
-    result_split = [i for i in str(result)]
-    num_of_digit = [len(factor1_split), len(factor2_split)]
-    for i in calculating_split:
-        num_of_digit.append(len(i))
-    num_of_digit.append(len(result_split))
-    all_digit = sum(num_of_digit)
-    for i in range(1, len(num_of_digit)):
-        num_of_digit[i] += num_of_digit[i - 1]
+    strt = 0
+    str_factor1 = str(factor1)
+    len_factor1 = len(str_factor1)
+    for i in range(len_factor1):
+        if int(str_factor1[:i + 1]) >= factor2:
+            strt = i
+            break
+    num = int(str_factor1[:strt])
+    for i in range(strt, len_factor1):
+        num *= 10
+        num += int(str_factor1[i])
+        calc = num // factor2
+        num %= factor2
+        calculating.append(num)
+    num_of_digit = len_factor1 + len(str(factor2)) + sum(len(str(i)) for i in calculating) + len(str(result))
+    print(factor1, factor2, result, calculating, num_of_digit)
 
     # 穴をランダムにあける
     holes = []
-    # 上段にあける穴の数は問題の難易度に直結するので、入力された難易度に比例して穴の数が多くなるようにする。
-    len_problem = len(str(factor1)) + len(str(factor2)) - 1
-    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
-    # 中段と下段にあける穴の数をランダムに決める
-    hole_calc_res = randint(min(all_digit - len_problem - 2, 1 + difficulty_input), all_digit - len_problem - 2)
+    min_holes = map_int(difficulty_input, 0, 9, min(difficulty_input, num_of_digit), num_of_digit // 2)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, num_of_digit // 1.5)
+    num_of_holes = randint(min_holes, max_holes)
     # 穴をあける場所を決める
-    for _ in range(hole_problem):
-        if len(holes) == all_digit:
-            break
-        tmp = randint(0, len_problem)
-        while tmp in holes:
-            tmp = randint(0, len_problem)
-        holes.append(tmp)
-    for _ in range(hole_calc_res):
+    for _ in range(num_of_holes):
         if len(holes) == all_digit:
             break
         tmp = randint(0, all_digit - 1)
@@ -190,7 +176,8 @@ def problem_maker_division(difficulty_input, digit, timeout=1):
     difficulties = []
     strt = time()
     t = 0
-
+    factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
+    '''
     # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
         factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
@@ -202,7 +189,7 @@ def problem_maker_division(difficulty_input, digit, timeout=1):
         difficulties.append(difficulty)
         ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
         ans_answer.append([str(factor1), str(factor2), [str(i) for i in calculating], str(result)])
-
+    '''
     # 採用する問題を選ぶ
     print(len(difficulties), 'answers found')
     if ans_problem:
