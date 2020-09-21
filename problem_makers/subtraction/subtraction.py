@@ -65,6 +65,8 @@ def explore_answers(factor1, factor2, result, difficulty):
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
                 res += tmp
+                if res >= 2:
+                    return -1, difficulty
             return res, difficulty
     
     calculating = [0 for _ in range(max(len(factor1), len(factor2)))]
@@ -89,6 +91,8 @@ def explore_answers(factor1, factor2, result, difficulty):
                     if tmp == -1 or res + tmp > 1:
                         return -1, difficulty
                     res += tmp
+                    if res >= 2:
+                        return -1, difficulty
             return res, difficulty
         else:
             tmp = 0

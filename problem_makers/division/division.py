@@ -110,6 +110,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
         return res, difficulty
     print(factor1, factor2, calculating, result, difficulty)
 
+    
+
     '''
     for i, j in enumerate(factor2):
         if j == 'x':

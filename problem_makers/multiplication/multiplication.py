@@ -68,6 +68,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
                 res += tmp
+                if res >= 2:
+                    return -1, difficulty
             return res, difficulty
     
     # factor1に穴がなく、factor2(上段の下)に穴がある場合はランダムに埋めつつ矛盾がないか確認して再帰呼び出しする。
@@ -90,6 +92,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                     if tmp == -1 or res + tmp > 1:
                         return -1, difficulty
                     res += tmp
+                    if res >= 2:
+                        return -1, difficulty
             return res, difficulty
     
     # factor1もfactor2も埋まっている場合は矛盾がないかチェックする。
