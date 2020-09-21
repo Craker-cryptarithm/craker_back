@@ -21,7 +21,7 @@ def map_int(from_num, from_min, from_max, to_min, to_max):
 # 等幅フォントで綺麗に筆算を表示する関数
 def print_figure(arr):
     factor1, factor2, calculating, result = arr
-    ans_str = ['' for _ in range(5 + len(calculating))]
+    ans_str = ['' for _ in range(5 + len(calculating) * 3 // 2)]
     width = len(str(factor1)) + 1 + len(str(factor2))
     for _ in range(width - len(str(result))):
         ans_str[0] += ' '
@@ -32,6 +32,22 @@ def print_figure(arr):
         ans_str[1] += '_'
     ans_str[1]
     ans_str[2] = str(factor2) + ')' + str(factor1)
+    end = len(str(factor1)) - len(str(result)) + len(str(factor2)) + 2
+    idx = 3
+    for i, calc in enumerate(calculating):
+        for _ in range(end - len(str(calc)) + i // 2):
+            ans_str[idx] += ' '
+        ans_str[idx] += str(calc)
+        if i != len(calculating) - 1:
+            if i % 2:
+                ans_str[idx] += str(factor1)[end + i // 2 - len(str(factor2)) - 1]
+                idx += 1
+            else:
+                for _ in range(len(str(factor2)) + 1):
+                    ans_str[idx + 1] += ' '
+                for _ in range(len(str(factor1))):
+                    ans_str[idx + 1] += '_'
+                idx += 2
     for line in ans_str:
         print(line)
     return '\n'.join(ans_str)
@@ -124,6 +140,7 @@ def random_problem(difficulty_input, digit):
         num += int(str_factor1[i])
         calc = num // factor2
         num %= factor2
+        calculating.append(factor2 * int(str(result)[i - strt]))
         calculating.append(num)
     all_digit = len_factor1 + len_factor2 + sum(len(str(i)) for i in calculating) + len_result
     factor1_split = [i for i in str(factor1)]
