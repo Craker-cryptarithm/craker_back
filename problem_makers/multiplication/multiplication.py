@@ -143,9 +143,9 @@ def random_problem(difficulty_input, digit):
     holes = []
     # 上段にあける穴の数は問題の難易度に直結するので、入力された難易度に比例して穴の数が多くなるようにする。
     len_problem = len(str(factor1)) + len(str(factor2)) - 1
-    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem)
+    hole_problem = map_int(difficulty_input, 0, 9, 1, len_problem // 1.5)
     # 中段と下段にあける穴の数をランダムに決める
-    hole_calc_res = randint(min(all_digit - len_problem - 2, 1 + difficulty_input), all_digit - len_problem - 2)
+    hole_calc_res = randint(min(all_digit - len_problem - 2, 1 + difficulty_input), (all_digit - len_problem) // 1.5)
     # 穴をあける場所を決める
     for _ in range(hole_problem):
         if len(holes) == all_digit:
