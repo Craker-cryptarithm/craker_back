@@ -8,4 +8,4 @@ print('\n\n')
 problem_maker_multiplication(9, 5)
 print('\n\n')
 '''
-problem_maker_division(9, 5)
+problem_maker_division(2, 3)

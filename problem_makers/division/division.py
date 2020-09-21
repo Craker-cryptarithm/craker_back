@@ -37,7 +37,12 @@ def print_figure(arr):
     for i, calc in enumerate(calculating):
         for _ in range(end - len(str(calc)) + i // 2):
             ans_str[idx] += ' '
-        ans_str[idx] += str(calc)
+        strt = 0
+        while strt < len(str(calc)) and str(calc)[strt] == '0':
+            strt += 1
+            ans_str[idx] += ' '
+        if strt < len(str(calc)):
+            ans_str[idx] += str(calc)[strt:]
         if i != len(calculating) - 1:
             if i % 2:
                 ans_str[idx] += str(factor1)[end + i // 2 - len(str(factor2)) - 1]
@@ -76,6 +81,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                 if tmp == -1 or res + tmp > 1:
                     return -1, difficulty
                 res += tmp
+                if res >= 2:
+                    return -1, difficulty
             return res, difficulty
     
     # factor1に穴がなく、factor2(割る数)に穴がある場合はランダムに埋めつつ矛盾がないか確認して再帰呼び出しする。
@@ -96,21 +103,45 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                     break
             else:
                 factor2_candidate = str(int_factor1 // result_candidate)
-                if len(factor2_candidate) != len_factor2:
-                    continue
                 for i, j in zip(factor2, factor2_candidate):
                     if 'x' != i != j:
                         break
                 else:
+                    print(int_factor1, ''.join(factor2_candidate), result_candidate)
                     tmp, n_difficulty = explore_answers(factor1, [i for i in factor2_candidate], calculating, [i for i in str(result_candidate)], 0)
                     difficulty += n_difficulty
                     if tmp == -1:
                         return -1, difficulty
                     res += tmp
+                    if res >= 2:
+                        return -1, difficulty
         return res, difficulty
-    print(factor1, factor2, calculating, result, difficulty)
+    #print(factor1, factor2, calculating, result, difficulty)
 
-    
+    calculating_expected = []
+    str_factor1 = str(''.join(factor1))
+    len_factor1 = len(factor1)
+    int_factor2 = int(''.join(factor2))
+    str_result = ''.join(result)
+    print(str_result)
+    strt = len_factor1 - len(str(''.join(result)))
+    num = str_factor1[:strt]
+    if num == '':
+        num = 0
+    else:
+        num = int(num)
+    for i in range(strt, len_factor1):
+        num *= 10
+        num += int(str_factor1[i])
+        num %= int_factor2
+        calculating_expected.append(str(int_factor2 * int(str_result[i - strt])))
+        calculating_expected.append(str(num))
+    for calc, calc_ex in zip(calculating, calculating_expected):
+        if len(calc) != len(calc_ex):
+            return 0, difficulty
+        for i, j in zip(calc, calc_ex):
+            if 'x' != i != j:
+                return 0, difficulty
 
     '''
     for i, j in enumerate(factor2):
@@ -168,7 +199,10 @@ def random_problem(difficulty_input, digit):
     len_factor2 = len(str(factor2))
     len_result = len(str(result))
     strt = len_factor1 - len_result
-    num = int(str_factor1[:strt])
+    num = str_factor1[:strt]
+    if num == '':
+        num = 0
+    else:num = int(num)
     for i in range(strt, len_factor1):
         num *= 10
         num += int(str_factor1[i])
