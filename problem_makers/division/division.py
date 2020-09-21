@@ -53,8 +53,6 @@ def print_figure(arr):
                 for _ in range(len(str(factor1))):
                     ans_str[idx + 1] += '_'
                 idx += 2
-    for line in ans_str:
-        print(line)
     return '\n'.join(ans_str)
 
 
@@ -102,12 +100,14 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
                 if 'x' != i != j:
                     break
             else:
-                factor2_candidate = str(int_factor1 // result_candidate)
+                factor2_candidate = int_factor1 // result_candidate
+                if factor2_candidate == 0:
+                    continue
+                factor2_candidate = str(factor2_candidate)
                 for i, j in zip(factor2, factor2_candidate):
                     if 'x' != i != j:
                         break
                 else:
-                    print(int_factor1, ''.join(factor2_candidate), result_candidate)
                     tmp, n_difficulty = explore_answers(factor1, [i for i in factor2_candidate], calculating, [i for i in str(result_candidate)], 0)
                     difficulty += n_difficulty
                     if tmp == -1:
@@ -118,12 +118,16 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
         return res, difficulty
     #print(factor1, factor2, calculating, result, difficulty)
 
+    int_factor2 = int(''.join(factor2))
+    result_candidate = [i for i in str(int(''.join(factor1)) // int_factor2)]
+    for i, j in zip(result, result_candidate):
+        if 'x' != i != j:
+            return -1, difficulty
+    result = result_candidate
     calculating_expected = []
     str_factor1 = str(''.join(factor1))
     len_factor1 = len(factor1)
-    int_factor2 = int(''.join(factor2))
     str_result = ''.join(result)
-    print(str_result)
     strt = len_factor1 - len(str(''.join(result)))
     num = str_factor1[:strt]
     if num == '':
@@ -142,43 +146,6 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
         for i, j in zip(calc, calc_ex):
             if 'x' != i != j:
                 return 0, difficulty
-
-    '''
-    for i, j in enumerate(factor2):
-        if j == 'x':
-            res = 0
-            for num in range(10):
-                calculating_expected = [i for i in str(int_factor1)]
-                if len(calculating_expected) != len(calculating[len(calculating) - 1 - i]):
-                    continue
-                for k, l in zip(calculating[len(calculating) - 1 - i], calculating_expected):
-                    if 'x' != k != l:
-                        break
-                else:
-                    n_factor2 = [k for k in factor2]
-                    n_factor2[i] = str(num)
-                    tmp, n_difficulty = explore_answers(factor1, n_factor2, calculating, result, 0)
-                    difficulty += n_difficulty
-                    if tmp == -1 or res + tmp > 1:
-                        return -1, difficulty
-                    res += tmp
-            return res, difficulty
-    
-    # factor1もfactor2も埋まっている場合は矛盾がないかチェックする。
-    # factor2を埋める際にcalculating(中段)では矛盾がないことが保証されるので、result(下段)で矛盾がないか確認する。
-    calculating_expected = []
-    for i in reversed([int(i) for i in factor2]):
-        calculating_expected.append(int_factor1 * i)
-    result_expected = 0
-    for i, j in enumerate([i for i in calculating_expected]):
-        result_expected += j * (10 ** i)
-    result_expected = [i for i in str(result_expected)]
-    if len(result) != len(result_expected):
-        return 0, difficulty
-    for i, j in zip(result, result_expected):
-        if 'x' != i != j:
-            return 0, difficulty
-    '''
     return 1, difficulty
 
 
@@ -188,8 +155,8 @@ def explore_answers(factor1, factor2, calculating, result, difficulty):
 def random_problem(difficulty_input, digit):
     # ランダムに上段の数字を決める
     max_num = 10 ** digit - 1
-    factor1 = randint(max_num // 10, max_num)
-    factor2 = randint(1, factor1 // 100)
+    factor1 = randint(max(200, max_num // 10), max_num)
+    factor2 = randint(2, factor1 // 100)
     result = factor1 // factor2
 
     # 下段の数字たちを計算する
@@ -218,8 +185,8 @@ def random_problem(difficulty_input, digit):
 
     # 穴をランダムにあける
     holes = []
-    min_holes = map_int(difficulty_input, 0, 9, min(difficulty_input, all_digit), all_digit // 2)
-    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 1.5)
+    min_holes = map_int(difficulty_input, 0, 9, min(difficulty_input, all_digit // 3), all_digit // 3)
+    max_holes = map_int(difficulty_input, 0, 9, min_holes, all_digit // 2)
     num_of_holes = randint(min_holes, max_holes)
     # 穴をあける場所を決める
     for _ in range(num_of_holes):
@@ -262,11 +229,6 @@ def problem_maker_division(difficulty_input, digit, timeout=1):
     difficulties = []
     strt = time()
     t = 0
-    factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
-    print_figure([factor1, factor2, calculating, result])
-    print_figure([''.join(factor1_hole), ''.join(factor2_hole), [''.join(calculating) for calculating in calculating_hole], ''.join(result_hole)])
-    res_ad, difficulty = explore_answers(factor1_hole, factor2_hole, calculating_hole, result_hole, 0)
-    '''
     # タイムアウトするまたは問題が10個見つかるまで問題を作成し、解の一意性を検証する。
     while time() - strt < timeout and t < 10:
         factor1_hole, factor2_hole, calculating_hole, result_hole, factor1, factor2, calculating, result = random_problem(difficulty_input, digit)
@@ -278,7 +240,6 @@ def problem_maker_division(difficulty_input, digit, timeout=1):
         difficulties.append(difficulty)
         ans_problem.append([''.join(factor1_hole), ''.join(factor2_hole), [''.join(i) for i in calculating_hole], ''.join(result_hole)])
         ans_answer.append([str(factor1), str(factor2), [str(i) for i in calculating], str(result)])
-    '''
     # 採用する問題を選ぶ
     print(len(difficulties), 'answers found')
     if ans_problem:
